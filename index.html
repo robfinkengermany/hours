@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Uren">
+  <meta name="theme-color" content="#2563EB">
+  <title>Uren</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Login ── -->
+  <div id="login-screen" class="screen">
+    <div class="login-box">
+      <div class="login-icon">🕐</div>
+      <h1>Uren</h1>
+      <p id="login-label">Voer je PIN in</p>
+      <input type="password" id="pin-input" inputmode="numeric" maxlength="8"
+             placeholder="PIN" autocomplete="current-password">
+      <input type="password" id="pin-confirm" inputmode="numeric" maxlength="8"
+             placeholder="Bevestig PIN" autocomplete="new-password" class="hidden">
+      <button id="login-btn" class="btn-primary full">Inloggen</button>
+      <p id="login-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- ── App ── -->
+  <div id="app" class="screen hidden">
+
+    <nav class="tab-bar">
+      <button class="tab active" data-tab="entry">＋ Invoer</button>
+      <button class="tab" data-tab="overview">Overzicht</button>
+      <button class="tab" data-tab="import">Import</button>
+      <button class="tab" data-tab="settings">⚙</button>
+    </nav>
+
+    <!-- Invoer -->
+    <section id="tab-entry" class="tab-content active">
+      <div class="form-card">
+        <h2>Dag registreren</h2>
+        <div class="form-row">
+          <label for="f-date">Datum</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="form-row">
+          <label for="f-start">Begin</label>
+          <input type="time" id="f-start">
+        </div>
+        <div class="form-row">
+          <label for="f-end">Einde</label>
+          <input type="time" id="f-end">
+        </div>
+        <div class="form-row">
+          <label for="f-break">Pauze (min)</label>
+          <input type="number" id="f-break" min="0" max="480" step="5" value="0">
+        </div>
+        <div class="form-row summary-row">
+          <span>Uren vandaag:</span>
+          <strong id="f-preview">–</strong>
+        </div>
+        <button id="save-btn" class="btn-primary full">Opslaan</button>
+      </div>
+    </section>
+
+    <!-- Overzicht -->
+    <section id="tab-overview" class="tab-content hidden">
+      <div id="overview-content"></div>
+    </section>
+
+    <!-- Import -->
+    <section id="tab-import" class="tab-content hidden">
+      <div class="form-card">
+        <h2>Excel importeren</h2>
+        <p class="hint">Selecteer een <strong>.xlsx</strong> bestand met kolommen:<br>
+          Datum · Anfang · Ende · Pro Tag · Pause</p>
+        <input type="file" id="import-file" accept=".xlsx,.xls" class="file-input">
+        <label for="import-file" class="btn-secondary full file-label">📂 Bestand kiezen</label>
+        <div id="import-preview" class="hidden"></div>
+        <button id="import-confirm" class="btn-primary full hidden">Importeren</button>
+      </div>
+    </section>
+
+    <!-- Instellingen + Export -->
+    <section id="tab-settings" class="tab-content hidden">
+      <div class="form-card">
+        <h2>Exporteren</h2>
+        <button id="export-csv" class="btn-secondary full">⬇ Download CSV</button>
+        <button id="export-json" class="btn-secondary full">⬇ Download JSON (backup)</button>
+      </div>
+      <div class="form-card">
+        <h2>PIN wijzigen</h2>
+        <input type="password" id="new-pin" inputmode="numeric" maxlength="8"
+               placeholder="Nieuwe PIN" autocomplete="new-password">
+        <input type="password" id="new-pin-confirm" inputmode="numeric" maxlength="8"
+               placeholder="Bevestig nieuwe PIN" autocomplete="new-password">
+        <button id="change-pin-btn" class="btn-secondary full">PIN opslaan</button>
+        <p id="pin-change-msg" class="hidden"></p>
+      </div>
+      <div class="form-card">
+        <h2>Alle gegevens wissen</h2>
+        <p class="hint">Verwijdert alle geregistreerde uren en betaald-bedragen. Exporteer eerst een backup als je de data wilt bewaren.</p>
+        <button id="clear-all-btn" class="btn-danger full">🗑 Alle data wissen</button>
+      </div>
+    </section>
+
+  </div><!-- /app -->
+
+  <!-- ── Bewerkmodal ── -->
+  <div id="edit-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <h3>Dag bewerken</h3>
+      <div class="form-row">
+        <label for="e-date">Datum</label>
+        <input type="date" id="e-date">
+      </div>
+      <div class="form-row">
+        <label for="e-start">Begin</label>
+        <input type="time" id="e-start">
+      </div>
+      <div class="form-row">
+        <label for="e-end">Einde</label>
+        <input type="time" id="e-end">
+      </div>
+      <div class="form-row">
+        <label for="e-break">Pauze (min)</label>
+        <input type="number" id="e-break" min="0" max="480" step="5" value="0">
+      </div>
+      <div class="modal-actions">
+        <button id="edit-save"   class="btn-primary">Opslaan</button>
+        <button id="edit-cancel" class="btn-ghost">Annuleren</button>
+        <button id="edit-delete" class="btn-danger">Verwijderen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
