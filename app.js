@@ -276,6 +276,8 @@ async function saveEntry() {
   $('f-break').value = 0;
   $('f-preview').textContent = '–';
 
+  renderOverview();
+
   // Brief visual feedback
   const btn = $('save-btn');
   btn.textContent = '✓ Opgeslagen';
