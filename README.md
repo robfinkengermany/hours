@@ -3,69 +3,7 @@
 Eine geschützte Smartphone-App, um Arbeitsstunden zu erfassen.  
 Funktioniert auf **iPhone** und **Android**, vollständig offline nach dem ersten Laden.
 
----
-
-## Schritt 1 — GitHub-Konto erstellen
-
-1. Gehe zu **[github.com](https://github.com)** und klicke auf **Sign up**
-2. Gib deine E-Mail-Adresse, deinen Benutzernamen und dein Passwort ein
-3. Bestätige deine E-Mail-Adresse über die Verifizierungs-Mail
-4. Dein Konto ist bereit
-
----
-
-## Schritt 2 — Repository erstellen
-
-1. Melde dich bei GitHub an
-2. Klicke oben rechts auf das **＋**-Symbol → **New repository**
-3. Gib einen Namen an, z. B. `stunden-app`
-4. Stelle auf **Public** (erforderlich für kostenlose GitHub Pages)
-5. Klicke auf **Create repository**
-
----
-
-## Schritt 3 — Dateien hochladen
-
-### Über die GitHub-Website (am einfachsten)
-1. Öffne das soeben erstellte Repository
-2. Klicke auf **Add file** → **Upload files**
-3. Ziehe alle Dateien aus dem Ordner `hours/` auf den Bildschirm:
-   - `index.html`
-   - `app.js`
-   - `style.css`
-   - `manifest.json`
-   - `sw.js`
-   - `icon-192.png`
-   - `icon-512.png`
-4. Klicke auf **Commit changes**
-
-### Über das Terminal (Alternative)
-```bash
-cd /pfad/zu/hours
-git init
-git add .
-git commit -m "erste Version"
-git remote add origin https://github.com/DEIN-NAME/stunden-app.git
-git push -u origin main
-```
-
----
-
-## Schritt 4 — GitHub Pages aktivieren
-
-1. Gehe in GitHub zu deinem Repository
-2. Klicke oben auf **Settings** (Zahnrad)
-3. Klicke im linken Menü auf **Pages**
-4. Stelle Folgendes ein:
-   - **Source:** Deploy from a branch
-   - **Branch:** `main` — `/ (root)`
-5. Klicke auf **Save**
-6. Warte etwa 1 Minute. Danach erscheint deine URL:  
-   `https://DEIN-NAME.github.io/stunden-app/`
-
----
-
-## Schritt 5 — App installieren
+App installieren
 
 ### iPhone
 1. Öffne die URL in **Safari** (nicht Chrome oder Firefox)
