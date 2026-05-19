@@ -103,11 +103,12 @@ function groupByMonth(entries) {
 
 function monthStats(mk) {
   const entries = _data.entries.filter(e => monthKey(e.date) === mk);
+  const realEntries = entries.filter(e => !e.planned);
   const workedHours = (_data.workedHours || {});
-  // Use imported Gearbeitet value when available; otherwise sum entries
+  // Use imported Gearbeitet value when available; otherwise sum real (non-planned) entries
   const worked = mk in workedHours
     ? workedHours[mk]
-    : entries.reduce((s, e) => s + entryHours(e), 0);
+    : realEntries.reduce((s, e) => s + entryHours(e), 0);
   const paid = (_data.paidHours[mk] || 0);
   return { entries, worked, paid, open: worked - paid };
 }
@@ -268,7 +269,8 @@ async function saveEntry() {
   const end      = $('f-end').value;
   const breakMin = +$('f-break').value || 0;
 
-  if (!date || !start || !end) { alert('Bitte Datum, Beginn und Ende angeben.'); return; }
+  if (!date) { alert('Bitte Datum angeben.'); return; }
+  if (!start || !end) { alert('Bitte Datum, Beginn und Ende angeben.'); return; }
   if (calcHours(start, end, breakMin) <= 0) { alert('Endzeit muss nach der Startzeit liegen.'); return; }
 
   const entry = { id: uid(), date, start, end, breakMin };
@@ -280,10 +282,25 @@ async function saveEntry() {
 
   renderOverview();
 
-  // Brief visual feedback
   const btn = $('save-btn');
   btn.textContent = '✓ Gespeichert';
   setTimeout(() => { btn.textContent = 'Speichern'; }, 1500);
+}
+
+async function savePlanned() {
+  const date = $('f-date').value;
+  if (!date) { alert('Bitte Datum angeben.'); return; }
+
+  const entry = { id: uid(), date, planned: true };
+  _data.entries.push(entry);
+  await saveData();
+  $('f-preview').textContent = '–';
+
+  renderOverview();
+
+  const btn = $('save-planned-btn');
+  btn.textContent = '✓ Gespeichert';
+  setTimeout(() => { btn.textContent = '📅 Als geplant speichern'; }, 1500);
 }
 
 // ═══════════════════════════════════════════════
@@ -354,7 +371,15 @@ function renderOverview() {
     </div>
   </div>
   <div class="month-entries" id="entries-${mk}">
-    ${rows.map(e => /* html */`
+    ${rows.map(e => e.planned
+      ? /* html */`
+      <div class="entry-row entry-planned" onclick="openEdit('${e.id}')">
+        <span class="entry-date">${fmtDate(e.date)}</span>
+        <span class="entry-times">📅 geplant</span>
+        <span class="entry-hours" style="color:var(--muted)">–</span>
+        <span class="entry-edit-hint">✎</span>
+      </div>`
+      : /* html */`
       <div class="entry-row" onclick="openEdit('${e.id}')">
         <span class="entry-date">${fmtDate(e.date)}</span>
         <span class="entry-times">${e.start}–${e.end}${e.breakMin ? ` (${e.breakMin}m)` : ''}</span>
@@ -399,9 +424,14 @@ function openEdit(id) {
   if (!e) return;
   _editId = id;
   $('e-date').value  = e.date;
-  $('e-start').value = e.start;
-  $('e-end').value   = e.end;
+  $('e-start').value = e.start || '';
+  $('e-end').value   = e.end   || '';
   $('e-break').value = e.breakMin || 0;
+  if (e.planned) {
+    $('e-planned-hint').classList.remove('hidden');
+  } else {
+    $('e-planned-hint').classList.add('hidden');
+  }
   $('edit-modal').classList.remove('hidden');
 }
 
@@ -411,12 +441,26 @@ async function saveEdit() {
   const start    = $('e-start').value;
   const end      = $('e-end').value;
   const breakMin = +$('e-break').value || 0;
-  if (calcHours(start, end, breakMin) <= 0) { alert('Endzeit muss nach der Startzeit liegen.'); return; }
-  const old     = _data.entries[idx];
-  const updated = { ...old, date: $('e-date').value, start, end, breakMin };
-  adjustWorked(monthKey(old.date),     -entryHours(old));
-  adjustWorked(monthKey(updated.date), +entryHours(updated));
-  _data.entries[idx] = updated;
+  const old      = _data.entries[idx];
+
+  if (start && end) {
+    if (calcHours(start, end, breakMin) <= 0) { alert('Endzeit muss nach der Startzeit liegen.'); return; }
+    const updated = { id: old.id, date: $('e-date').value, start, end, breakMin };
+    if (old.planned) {
+      // converting planned → real: add to workedHours
+      adjustWorked(monthKey(updated.date), entryHours(updated));
+    } else {
+      adjustWorked(monthKey(old.date),     -entryHours(old));
+      adjustWorked(monthKey(updated.date), +entryHours(updated));
+    }
+    _data.entries[idx] = updated;
+  } else {
+    // keep/set as planned
+    _data.entries[idx] = { id: old.id, date: $('e-date').value, planned: true };
+    if (!old.planned) {
+      adjustWorked(monthKey(old.date), -entryHours(old));
+    }
+  }
   await saveData();
   closeModal();
   renderOverview();
@@ -700,6 +744,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Entry form
   ['f-start','f-end','f-break'].forEach(id => $(id).addEventListener('input', updatePreview));
   $('save-btn').addEventListener('click', saveEntry);
+  $('save-planned-btn').addEventListener('click', savePlanned);
 
   // Edit modal
   $('edit-save').addEventListener('click', saveEdit);
