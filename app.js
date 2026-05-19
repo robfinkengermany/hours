@@ -375,8 +375,8 @@ function renderOverview() {
       ? /* html */`
       <div class="entry-row entry-planned" onclick="openEdit('${e.id}')">
         <span class="entry-date">${fmtDate(e.date)}</span>
-        <span class="entry-times">📅 ${e.start && e.end ? `${e.start}–${e.end}` : 'geplant'}</span>
-        <span class="entry-hours" style="color:var(--muted)">–</span>
+        <span class="entry-times">📅 ${e.start && e.end ? `${e.start}–${e.end}${e.breakMin ? ` (${e.breakMin}m)` : ''}` : 'geplant'}</span>
+        <span class="entry-hours" style="color:var(--muted)">${e.start && e.end ? fmtH(entryHours(e)) : '–'}</span>
         <span class="entry-edit-hint">✎</span>
       </div>`
       : /* html */`
