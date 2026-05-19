@@ -88,7 +88,7 @@ function entryHours(e) {
 function fmtH(h) {
   // Allow negative (overpaid months)
   const abs = Math.abs(h).toFixed(2).replace('.', ',');
-  return h < 0 ? `-${abs}u` : `${abs}u`;
+  return h < 0 ? `-${abs} Std.` : `${abs} Std.`;
 }
 
 function monthKey(iso) { return iso.slice(0, 7); }
@@ -126,7 +126,7 @@ function fmtDate(iso) {
   return `${d}-${m}-${y}`;
 }
 
-const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+const MONTHS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 function monthLabel(mk) {
   const [y, m] = mk.split('-');
   return `${MONTHS[+m - 1]} ${y}`;
@@ -168,13 +168,13 @@ async function handleLogin() {
   err.classList.add('hidden');
 
   if (pin.length < 4) {
-    err.textContent = 'PIN moet minimaal 4 tekens zijn.';
+    err.textContent = 'PIN muss mindestens 4 Zeichen lang sein.';
     err.classList.remove('hidden');
     return;
   }
 
   if (firstRun && pin !== pin2) {
-    err.textContent = 'PINs komen niet overeen.';
+    err.textContent = 'PINs stimmen nicht überein.';
     err.classList.remove('hidden');
     return;
   }
@@ -190,7 +190,7 @@ async function handleLogin() {
     } else {
       _key = await verifyPIN(pin);
       if (!_key) {
-        err.textContent = 'Verkeerde PIN. Probeer opnieuw.';
+        err.textContent = 'Falsche PIN. Bitte erneut versuchen.';
         err.classList.remove('hidden');
         return;
       }
@@ -202,10 +202,10 @@ async function handleLogin() {
     $('app').classList.remove('hidden');
     $('f-date').value = new Date().toISOString().slice(0, 10);
   } catch (e) {
-    err.textContent = 'Fout: ' + e.message;
+    err.textContent = 'Fehler: ' + e.message;
     err.classList.remove('hidden');
   } finally {
-    $('login-btn').textContent = firstRun ? 'PIN instellen' : 'Inloggen';
+    $('login-btn').textContent = firstRun ? 'PIN festlegen' : 'Anmelden';
     $('login-btn').disabled = false;
   }
 }
@@ -217,11 +217,11 @@ async function handleChangePIN() {
   msg.classList.add('hidden');
 
   if (p1.length < 4) {
-    msg.textContent = 'PIN moet minimaal 4 tekens zijn.'; msg.className = 'error';
+    msg.textContent = 'PIN muss mindestens 4 Zeichen lang sein.'; msg.className = 'error';
     msg.classList.remove('hidden'); return;
   }
   if (p1 !== p2) {
-    msg.textContent = 'PINs komen niet overeen.'; msg.className = 'error';
+    msg.textContent = 'PINs stimmen nicht überein.'; msg.className = 'error';
     msg.classList.remove('hidden'); return;
   }
 
@@ -234,7 +234,7 @@ async function handleChangePIN() {
 
   $('new-pin').value = '';
   $('new-pin-confirm').value = '';
-  msg.textContent = '✓ PIN gewijzigd.'; msg.className = 'success';
+  msg.textContent = '✓ PIN geändert.'; msg.className = 'success';
   msg.classList.remove('hidden');
 }
 
@@ -268,8 +268,8 @@ async function saveEntry() {
   const end      = $('f-end').value;
   const breakMin = +$('f-break').value || 0;
 
-  if (!date || !start || !end) { alert('Vul datum, begin én einde in.'); return; }
-  if (calcHours(start, end, breakMin) <= 0) { alert('Eindtijd moet na de begintijd liggen.'); return; }
+  if (!date || !start || !end) { alert('Bitte Datum, Beginn und Ende angeben.'); return; }
+  if (calcHours(start, end, breakMin) <= 0) { alert('Endzeit muss nach der Startzeit liegen.'); return; }
 
   const entry = { id: uid(), date, start, end, breakMin };
   _data.entries.push(entry);
@@ -282,8 +282,8 @@ async function saveEntry() {
 
   // Brief visual feedback
   const btn = $('save-btn');
-  btn.textContent = '✓ Opgeslagen';
-  setTimeout(() => { btn.textContent = 'Opslaan'; }, 1500);
+  btn.textContent = '✓ Gespeichert';
+  setTimeout(() => { btn.textContent = 'Speichern'; }, 1500);
 }
 
 // ═══════════════════════════════════════════════
@@ -304,7 +304,7 @@ function adjustWorked(mk, delta) {
 function renderOverview() {
   const el = $('overview-content');
   if (!_data.entries.length) {
-    el.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--muted)">Nog geen uren geregistreerd.</p>';
+    el.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--muted)">Noch keine Stunden erfasst.</p>';
     return;
   }
 
@@ -322,10 +322,10 @@ function renderOverview() {
   const grandOpen = sorted.reduce((sum, mk) => sum + monthStats(mk).open, 0);
   const grandColor  = grandOpen > 0.01 ? 'var(--red)' : grandOpen < -0.01 ? 'var(--blue)' : 'var(--green)';
   const grandLabel  = grandOpen > 0.01
-    ? `Totaal openstaand: <strong style="color:${grandColor}">${fmtH(grandOpen)}</strong>`
+    ? `Gesamt offen: <strong style="color:${grandColor}">${fmtH(grandOpen)}</strong>`
     : grandOpen < -0.01
-      ? `Saldo: <strong style="color:${grandColor}">${fmtH(grandOpen)}</strong> (meer betaald dan gewerkt)`
-      : `<strong style="color:${grandColor}">✓ Alles betaald</strong>`;
+      ? `Saldo: <strong style="color:${grandColor}">${fmtH(grandOpen)}</strong> (mehr bezahlt als gearbeitet)`
+      : `<strong style="color:${grandColor}">✓ Alles bezahlt</strong>`;
 
   const banner = `<div class="form-card" style="margin-bottom:1rem;flex-direction:row;align-items:center;gap:.5rem;">
     <span style="font-size:1.1rem">📊</span>
@@ -339,10 +339,10 @@ function renderOverview() {
     const paidVal   = s.paid.toFixed(2);
 
     const openPill = s.open > 0.01
-      ? `<span class="stat-pill pill-open">${fmtH(s.open)} open</span>`
+      ? `<span class="stat-pill pill-open">${fmtH(s.open)} offen</span>`
       : s.open < -0.01
         ? `<span class="stat-pill" style="background:#dbeafe;color:#1e40af">${fmtH(s.open)}</span>`
-        : `<span class="stat-pill pill-paid">✓ betaald</span>`;
+        : `<span class="stat-pill pill-paid">✓ bezahlt</span>`;
 
     return /* html */`
 <div class="month-block">
@@ -363,13 +363,13 @@ function renderOverview() {
       </div>`).join('')}
   </div>
   <div class="month-footer">
-    <span class="paid-label">Betaald:</span>
+    <span class="paid-label">Bezahlt:</span>
     <input class="paid-input" type="number" min="0" step="0.25"
       value="${paidVal}"
       onchange="setPaid('${mk}', this.value)"
       onclick="event.stopPropagation()">
-    <span class="paid-label">uur</span>
-    <span class="open-label">Open: <strong style="color:${openColor}">${fmtH(s.open)}</strong></span>
+    <span class="paid-label">Std.</span>
+    <span class="open-label">Offen: <strong style="color:${openColor}">${fmtH(s.open)}</strong></span>
   </div>
 </div>`;
   }).join('');
@@ -411,7 +411,7 @@ async function saveEdit() {
   const start    = $('e-start').value;
   const end      = $('e-end').value;
   const breakMin = +$('e-break').value || 0;
-  if (calcHours(start, end, breakMin) <= 0) { alert('Eindtijd moet na de begintijd liggen.'); return; }
+  if (calcHours(start, end, breakMin) <= 0) { alert('Endzeit muss nach der Startzeit liegen.'); return; }
   const old     = _data.entries[idx];
   const updated = { ...old, date: $('e-date').value, start, end, breakMin };
   adjustWorked(monthKey(old.date),     -entryHours(old));
@@ -423,7 +423,7 @@ async function saveEdit() {
 }
 
 async function deleteEdit() {
-  if (!confirm('Deze dag verwijderen?')) return;
+  if (!confirm('Diesen Tag löschen?')) return;
   const entry = _data.entries.find(x => x.id === _editId);
   if (entry) adjustWorked(monthKey(entry.date), -entryHours(entry));
   _data.entries = _data.entries.filter(x => x.id !== _editId);
@@ -451,12 +451,12 @@ function download(content, filename, mime) {
 }
 
 function exportCSV() {
-  const rows = ['Datum;Begin;Einde;Pauze (min);Uren'];
+  const rows = ['Datum;Beginn;Ende;Pause (Minuten);Stunden'];
   [..._data.entries].sort((a, b) => a.date.localeCompare(b.date)).forEach(e => {
     rows.push([fmtDate(e.date), e.start, e.end, e.breakMin,
       entryHours(e).toFixed(2).replace('.', ',')].join(';'));
   });
-  rows.push('', 'Maand;Gewerkt;Betaald;Openstaand');
+  rows.push('', 'Monat;Gearbeitet;Bezahlt;Offen');
   Object.keys(groupByMonth(_data.entries)).sort().forEach(mk => {
     const s = monthStats(mk);
     rows.push([monthLabel(mk),
@@ -464,11 +464,11 @@ function exportCSV() {
       s.paid.toFixed(2).replace('.', ','),
       s.open.toFixed(2).replace('.', ',')].join(';'));
   });
-  download('\uFEFF' + rows.join('\r\n'), 'uren.csv', 'text/csv;charset=utf-8');
+  download('\uFEFF' + rows.join('\r\n'), 'stunden.csv', 'text/csv;charset=utf-8');
 }
 
 function exportJSON() {
-  download(JSON.stringify(_data, null, 2), 'uren.json', 'application/json');
+  download(JSON.stringify(_data, null, 2), 'stunden.json', 'application/json');
 }
 
 // ═══════════════════════════════════════════════
@@ -502,7 +502,7 @@ function handleImportFile(e) {
       });
       showImportPreview();
     } catch (err) {
-      alert('Kon het bestand niet lezen: ' + err.message);
+      alert('Datei konnte nicht gelesen werden: ' + err.message);
     }
   };
   reader.readAsBinaryString(file);
@@ -605,7 +605,7 @@ function showImportPreview() {
   const btn     = $('import-confirm');
 
   if (!_importRows.length) {
-    preview.innerHTML = '<p class="error">Geen geldige rijen gevonden. Controleer het bestandsformaat.</p>';
+    preview.innerHTML = '<p class="error">Keine gültigen Zeilen gefunden. Bitte das Dateiformat prüfen.</p>';
     preview.classList.remove('hidden');
     btn.classList.add('hidden');
     return;
@@ -618,14 +618,14 @@ function showImportPreview() {
 
   const paidLines = Object.entries(_importPaid)
     .sort(([a],[b]) => a.localeCompare(b))
-    .map(([mk, p]) => `${monthLabel(mk)}: ${p.toFixed(2).replace('.',',')}u betaald`)
+    .map(([mk, p]) => `${monthLabel(mk)}: ${p.toFixed(2).replace('.',',')} Std. bezahlt`)
     .join(' · ');
 
   preview.innerHTML =
     `<p style="margin-bottom:.5rem;font-size:.85rem;color:var(--muted)">`+
-    `${_importRows.length} rijen gevonden${_importRows.length > 6 ? ' (eerste 6 getoond)' : ''}:</p>`+
+    `${_importRows.length} Zeilen gefunden${_importRows.length > 6 ? ' (erste 6 angezeigt)' : ''}:</p>`+
     `<table class="import-table"><thead>`+
-    `<tr><th>Datum</th><th>Begin</th><th>Einde</th><th>Pauze</th><th>Uren</th></tr>`+
+    `<tr><th>Datum</th><th>Beginn</th><th>Ende</th><th>Pause</th><th>Stunden</th></tr>`+
     `</thead><tbody>${sample}</tbody></table>`+
     (paidLines ? `<p style="margin-top:.75rem;font-size:.82rem;color:var(--muted)">💰 ${paidLines}</p>` : '');
   preview.classList.remove('hidden');
@@ -653,10 +653,10 @@ async function confirmImport() {
   const paidCount   = Object.keys(_importPaid).length;
   const workedCount = Object.keys(_importWorked).length;
   $('import-preview').innerHTML =
-    `<p class="success">✓ ${added} rijen geïmporteerd`+
-    `${skipped ? `, ${skipped} overgeslagen (datum al bestaat)` : ''}`+
-    `${workedCount ? `, gewerkte uren voor ${workedCount} maand(en) ingeladen` : ''}`+
-    `${paidCount   ? `, betaald-bedragen voor ${paidCount} maand(en) ingeladen` : ''}.</p>`;
+    `<p class="success">✓ ${added} Zeilen importiert`+
+    `${skipped ? `, ${skipped} übersprungen (Datum bereits vorhanden)` : ''}`+
+    `${workedCount ? `, Arbeitsstunden für ${workedCount} Monat(e) geladen` : ''}`+
+    `${paidCount   ? `, Bezahlbeträge für ${paidCount} Monat(e) geladen` : ''}.</p>`;
   $('import-confirm').classList.add('hidden');
   _importRows   = [];
   _importPaid   = {};
@@ -665,12 +665,12 @@ async function confirmImport() {
 }
 
 async function clearAllData() {
-  if (!confirm('Weet je zeker dat je ALLE uren en betaald-bedragen wilt verwijderen?\nDit kan niet ongedaan worden gemaakt.')) return;
-  if (!confirm('Laatste kans: alle data wordt permanent gewist. Doorgaan?')) return;
+  if (!confirm('Bist du sicher, dass du ALLE Stunden und Bezahlbeträge löschen möchtest?\nDies kann nicht rückgängig gemacht werden.')) return;
+  if (!confirm('Letzte Chance: Alle Daten werden dauerhaft gelöscht. Fortfahren?')) return;
   _data = { entries: [], paidHours: {}, workedHours: {} };
   await saveData();
   renderOverview();
-  alert('✓ Alle data gewist. Je kunt nu opnieuw importeren.');
+  alert('✓ Alle Daten gelöscht. Du kannst jetzt erneut importieren.');
 }
 
 // ═══════════════════════════════════════════════
@@ -683,8 +683,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // First-run: show confirm field and change button label
   if (isFirstRun()) {
-    $('login-label').textContent = 'Kies een PIN (minimaal 4 tekens)';
-    $('login-btn').textContent   = 'PIN instellen';
+    $('login-label').textContent = 'Wähle eine PIN (mindestens 4 Zeichen)';
+    $('login-btn').textContent   = 'PIN festlegen';
     $('pin-confirm').classList.remove('hidden');
   }
 

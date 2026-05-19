@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Uren">
+  <meta name="apple-mobile-web-app-title" content="Stunden">
   <meta name="theme-color" content="#2563EB">
-  <title>Uren</title>
+  <title>Stunden</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="style.css">
@@ -18,13 +18,13 @@
   <div id="login-screen" class="screen">
     <div class="login-box">
       <div class="login-icon">🕐</div>
-      <h1>Uren</h1>
-      <p id="login-label">Voer je PIN in</p>
+      <h1>Stunden</h1>
+      <p id="login-label">Gib deine PIN ein</p>
       <input type="password" id="pin-input" inputmode="numeric" maxlength="8"
              placeholder="PIN" autocomplete="current-password">
       <input type="password" id="pin-confirm" inputmode="numeric" maxlength="8"
-             placeholder="Bevestig PIN" autocomplete="new-password" class="hidden">
-      <button id="login-btn" class="btn-primary full">Inloggen</button>
+             placeholder="PIN bestätigen" autocomplete="new-password" class="hidden">
+      <button id="login-btn" class="btn-primary full">Anmelden</button>
       <p id="login-error" class="error hidden"></p>
     </div>
   </div>
@@ -33,8 +33,8 @@
   <div id="app" class="screen hidden">
 
     <nav class="tab-bar">
-      <button class="tab active" data-tab="entry">＋ Invoer</button>
-      <button class="tab" data-tab="overview">Overzicht</button>
+      <button class="tab active" data-tab="entry">＋ Eingabe</button>
+      <button class="tab" data-tab="overview">Übersicht</button>
       <button class="tab" data-tab="import">Import</button>
       <button class="tab" data-tab="settings">⚙</button>
     </nav>
@@ -42,28 +42,28 @@
     <!-- Invoer -->
     <section id="tab-entry" class="tab-content active">
       <div class="form-card">
-        <h2>Dag registreren</h2>
+        <h2>Tag erfassen</h2>
         <div class="form-row">
           <label for="f-date">Datum</label>
           <input type="date" id="f-date">
         </div>
         <div class="form-row">
-          <label for="f-start">Begin</label>
+          <label for="f-start">Beginn</label>
           <input type="time" id="f-start">
         </div>
         <div class="form-row">
-          <label for="f-end">Einde</label>
+          <label for="f-end">Ende</label>
           <input type="time" id="f-end">
         </div>
         <div class="form-row">
-          <label for="f-break">Pauze (min)</label>
+          <label for="f-break">Pause (Min.)</label>
           <input type="number" id="f-break" min="0" max="480" step="5" value="0">
         </div>
         <div class="form-row summary-row">
-          <span>Uren vandaag:</span>
+          <span>Stunden heute:</span>
           <strong id="f-preview">–</strong>
         </div>
-        <button id="save-btn" class="btn-primary full">Opslaan</button>
+        <button id="save-btn" class="btn-primary full">Speichern</button>
       </div>
     </section>
 
@@ -75,36 +75,36 @@
     <!-- Import -->
     <section id="tab-import" class="tab-content hidden">
       <div class="form-card">
-        <h2>Excel importeren</h2>
-        <p class="hint">Selecteer een <strong>.xlsx</strong> bestand met kolommen:<br>
-          Datum · Anfang · Ende · Pro Tag · Pause</p>
+        <h2>Excel importieren</h2>
+        <p class="hint">Wähle eine <strong>.xlsx</strong>-Datei mit folgenden Spalten:<br>
+          Datum · Beginn · Ende · Pro Tag · Pause</p>
         <input type="file" id="import-file" accept=".xlsx,.xls" class="file-input">
-        <label for="import-file" class="btn-secondary full file-label">📂 Bestand kiezen</label>
+        <label for="import-file" class="btn-secondary full file-label">📂 Datei auswählen</label>
         <div id="import-preview" class="hidden"></div>
-        <button id="import-confirm" class="btn-primary full hidden">Importeren</button>
+        <button id="import-confirm" class="btn-primary full hidden">Importieren</button>
       </div>
     </section>
 
     <!-- Instellingen + Export -->
     <section id="tab-settings" class="tab-content hidden">
       <div class="form-card">
-        <h2>Exporteren</h2>
-        <button id="export-csv" class="btn-secondary full">⬇ Download CSV</button>
-        <button id="export-json" class="btn-secondary full">⬇ Download JSON (backup)</button>
+        <h2>Exportieren</h2>
+        <button id="export-csv" class="btn-secondary full">⬇ CSV herunterladen</button>
+        <button id="export-json" class="btn-secondary full">⬇ JSON herunterladen (Sicherung)</button>
       </div>
       <div class="form-card">
-        <h2>PIN wijzigen</h2>
+        <h2>PIN ändern</h2>
         <input type="password" id="new-pin" inputmode="numeric" maxlength="8"
-               placeholder="Nieuwe PIN" autocomplete="new-password">
+               placeholder="Neue PIN" autocomplete="new-password">
         <input type="password" id="new-pin-confirm" inputmode="numeric" maxlength="8"
-               placeholder="Bevestig nieuwe PIN" autocomplete="new-password">
-        <button id="change-pin-btn" class="btn-secondary full">PIN opslaan</button>
+               placeholder="Neue PIN bestätigen" autocomplete="new-password">
+        <button id="change-pin-btn" class="btn-secondary full">PIN speichern</button>
         <p id="pin-change-msg" class="hidden"></p>
       </div>
       <div class="form-card">
-        <h2>Alle gegevens wissen</h2>
-        <p class="hint">Verwijdert alle geregistreerde uren en betaald-bedragen. Exporteer eerst een backup als je de data wilt bewaren.</p>
-        <button id="clear-all-btn" class="btn-danger full">🗑 Alle data wissen</button>
+        <h2>Alle Daten löschen</h2>
+        <p class="hint">Löscht alle erfassten Stunden und Bezahlbeträge. Exportiere zuerst eine Sicherung, wenn du die Daten behalten möchtest.</p>
+        <button id="clear-all-btn" class="btn-danger full">🗑 Alle Daten löschen</button>
       </div>
     </section>
 
@@ -113,27 +113,27 @@
   <!-- ── Bewerkmodal ── -->
   <div id="edit-modal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-content">
-      <h3>Dag bewerken</h3>
+      <h3>Tag bearbeiten</h3>
       <div class="form-row">
         <label for="e-date">Datum</label>
         <input type="date" id="e-date">
       </div>
       <div class="form-row">
-        <label for="e-start">Begin</label>
+        <label for="e-start">Beginn</label>
         <input type="time" id="e-start">
       </div>
       <div class="form-row">
-        <label for="e-end">Einde</label>
+        <label for="e-end">Ende</label>
         <input type="time" id="e-end">
       </div>
       <div class="form-row">
-        <label for="e-break">Pauze (min)</label>
+        <label for="e-break">Pause (Min.)</label>
         <input type="number" id="e-break" min="0" max="480" step="5" value="0">
       </div>
       <div class="modal-actions">
-        <button id="edit-save"   class="btn-primary">Opslaan</button>
-        <button id="edit-cancel" class="btn-ghost">Annuleren</button>
-        <button id="edit-delete" class="btn-danger">Verwijderen</button>
+        <button id="edit-save"   class="btn-primary">Speichern</button>
+        <button id="edit-cancel" class="btn-ghost">Abbrechen</button>
+        <button id="edit-delete" class="btn-danger">Löschen</button>
       </div>
     </div>
   </div>

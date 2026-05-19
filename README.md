@@ -1,35 +1,35 @@
-# Uren Registratie — PWA
+# Stundenerfassung — PWA
 
-Een beveiligde smartphone-app om gewerkte uren bij te houden.  
-Werkt op **iPhone** én **Android**, volledig offline na de eerste keer laden.
-
----
-
-## Stap 1 — GitHub-account aanmaken
-
-1. Ga naar **[github.com](https://github.com)** en klik op **Sign up**
-2. Vul je e-mailadres, gebruikersnaam en wachtwoord in
-3. Bevestig je e-mailadres via de verificatiemail
-4. Je account is klaar
+Eine geschützte Smartphone-App, um Arbeitsstunden zu erfassen.  
+Funktioniert auf **iPhone** und **Android**, vollständig offline nach dem ersten Laden.
 
 ---
 
-## Stap 2 — Repository aanmaken
+## Schritt 1 — GitHub-Konto erstellen
 
-1. Log in op GitHub
-2. Klik op het **＋** icoontje rechtsboven → **New repository**
-3. Geef het een naam, bijv. `uren-app`
-4. Zet op **Public** (vereist voor gratis GitHub Pages)
-5. Klik **Create repository**
+1. Gehe zu **[github.com](https://github.com)** und klicke auf **Sign up**
+2. Gib deine E-Mail-Adresse, deinen Benutzernamen und dein Passwort ein
+3. Bestätige deine E-Mail-Adresse über die Verifizierungs-Mail
+4. Dein Konto ist bereit
 
 ---
 
-## Stap 3 — Bestanden uploaden
+## Schritt 2 — Repository erstellen
 
-### Via de GitHub-website (eenvoudigst)
-1. Open de zojuist gemaakte repository
-2. Klik **Add file** → **Upload files**
-3. Sleep alle bestanden uit de `hours/` map naar het scherm:
+1. Melde dich bei GitHub an
+2. Klicke oben rechts auf das **＋**-Symbol → **New repository**
+3. Gib einen Namen an, z. B. `stunden-app`
+4. Stelle auf **Public** (erforderlich für kostenlose GitHub Pages)
+5. Klicke auf **Create repository**
+
+---
+
+## Schritt 3 — Dateien hochladen
+
+### Über die GitHub-Website (am einfachsten)
+1. Öffne das soeben erstellte Repository
+2. Klicke auf **Add file** → **Upload files**
+3. Ziehe alle Dateien aus dem Ordner `hours/` auf den Bildschirm:
    - `index.html`
    - `app.js`
    - `style.css`
@@ -37,80 +37,80 @@ Werkt op **iPhone** én **Android**, volledig offline na de eerste keer laden.
    - `sw.js`
    - `icon-192.png`
    - `icon-512.png`
-4. Klik **Commit changes**
+4. Klicke auf **Commit changes**
 
-### Via de terminal (alternatief)
+### Über das Terminal (Alternative)
 ```bash
-cd /pad/naar/hours
+cd /pfad/zu/hours
 git init
 git add .
-git commit -m "eerste versie"
-git remote add origin https://github.com/JOUW-NAAM/uren-app.git
+git commit -m "erste Version"
+git remote add origin https://github.com/DEIN-NAME/stunden-app.git
 git push -u origin main
 ```
 
 ---
 
-## Stap 4 — GitHub Pages inschakelen
+## Schritt 4 — GitHub Pages aktivieren
 
-1. Ga naar je repository op GitHub
-2. Klik bovenaan op **Settings** (tandwiel)
-3. Klik in het linkermenu op **Pages**
-4. Stel in:
+1. Gehe in GitHub zu deinem Repository
+2. Klicke oben auf **Settings** (Zahnrad)
+3. Klicke im linken Menü auf **Pages**
+4. Stelle Folgendes ein:
    - **Source:** Deploy from a branch
    - **Branch:** `main` — `/ (root)`
-5. Klik **Save**
-6. Wacht ~1 minuut. Je URL verschijnt:  
-   `https://JOUW-NAAM.github.io/uren-app/`
+5. Klicke auf **Save**
+6. Warte etwa 1 Minute. Danach erscheint deine URL:  
+   `https://DEIN-NAME.github.io/stunden-app/`
 
 ---
 
-## Stap 5 — App installeren
+## Schritt 5 — App installieren
 
 ### iPhone
-1. Open de URL in **Safari** (niet Chrome of Firefox)
-2. Tik op het **deel-icoon** (□↑) onderin de balk
-3. Tik **"Zet op beginscherm"**
-4. Geef een naam (bijv. "Uren") en tik **Voeg toe**
+1. Öffne die URL in **Safari** (nicht Chrome oder Firefox)
+2. Tippe unten in der Leiste auf das **Teilen-Symbol** (□↑)
+3. Tippe auf **"Zum Home-Bildschirm"**
+4. Vergib einen Namen (z. B. "Stunden") und tippe auf **Hinzufügen**
 
 ### Android
-1. Open de URL in **Chrome**
-2. Tik op het **menu** (⋮ rechtsboven)
-3. Tik **"Toevoegen aan startscherm"**  
-   (of accepteer de installatiemelding onderaan het scherm)
-4. Tik **Installeren**
+1. Öffne die URL in **Chrome**
+2. Tippe auf das **Menü** (⋮ oben rechts)
+3. Tippe auf **"Zum Startbildschirm hinzufügen"**  
+   (oder akzeptiere die Installationsmeldung unten auf dem Bildschirm)
+4. Tippe auf **Installieren**
 
 ---
 
-## Gebruik
+## Verwendung
 
-| Tab | Functie |
+| Tab | Funktion |
 |-----|---------|
-| **＋ Invoer** | Dag registreren: datum, begin, einde, pauze |
-| **Overzicht** | Uren per maand; betaald uren invullen; dag bewerken of verwijderen |
-| **Import** | Bestaand Excel-bestand (.xlsx) inladen |
-| **⚙** | CSV/JSON exporteren, PIN wijzigen |
+| **＋ Eingabe** | Tag erfassen: Datum, Beginn, Ende, Pause |
+| **Übersicht** | Stunden pro Monat; bezahlte Stunden eintragen; Tag bearbeiten oder löschen |
+| **Import** | Vorhandene Excel-Datei (.xlsx) laden |
+| **⚙** | CSV/JSON exportieren, PIN ändern |
 
-### Dag bewerken of verwijderen
-Tik op een rij in het **Overzicht** om een dag te bewerken of te verwijderen.
-
----
-
-## Beveiliging
-
-Alle data is versleuteld opgeslagen met **AES-256-GCM**.  
-Zonder de juiste PIN zijn de gegevens op het apparaat volledig onleesbaar.
+### Tag bearbeiten oder löschen
+Tippe in der **Übersicht** auf eine Zeile, um einen Tag zu bearbeiten oder zu löschen.
 
 ---
 
-## Icoon aanpassen
+## Sicherheit
 
-Vervang `icon-192.png` en `icon-512.png` door je eigen afbeeldingen  
-(respectievelijk 192×192 en 512×512 pixels, PNG-formaat).
+Alle Daten werden verschlüsselt mit **AES-256-GCM** gespeichert.  
+Ohne die richtige PIN sind die Daten auf dem Gerät vollständig unlesbar.
 
 ---
 
-## Updates uitrollen
+## Symbol anpassen
 
-Pas een bestand aan, upload het opnieuw via GitHub en de app vernieuwt  
-zichzelf automatisch de volgende keer dat je het opent met internet.
+Ersetze `icon-192.png` und `icon-512.png` durch deine eigenen Bilder  
+(jeweils 192×192 bzw. 512×512 Pixel, PNG-Format).
+
+---
+
+## Updates ausrollen
+
+Ändere eine Datei, lade sie erneut über GitHub hoch, und die App aktualisiert  
+sich beim nächsten Öffnen mit Internetverbindung automatisch.
