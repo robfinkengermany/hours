@@ -103,13 +103,13 @@ function groupByMonth(entries) {
 
 function monthStats(mk) {
   const entries = _data.entries.filter(e => monthKey(e.date) === mk);
-  // Use imported Gearbeitet value when available (avoids wrong totals from invalid dates)
   const workedHours = (_data.workedHours || {});
+  // Use imported Gearbeitet value when available; otherwise sum entries
   const worked = mk in workedHours
     ? workedHours[mk]
     : entries.reduce((s, e) => s + entryHours(e), 0);
   const paid = (_data.paidHours[mk] || 0);
-  return { entries, worked, paid, open: worked - paid };  // open may be negative = overpaid
+  return { entries, worked, paid, open: worked - paid };
 }
 
 // ═══════════════════════════════════════════════
@@ -271,7 +271,9 @@ async function saveEntry() {
   if (!date || !start || !end) { alert('Vul datum, begin én einde in.'); return; }
   if (calcHours(start, end, breakMin) <= 0) { alert('Eindtijd moet na de begintijd liggen.'); return; }
 
-  _data.entries.push({ id: uid(), date, start, end, breakMin });
+  const entry = { id: uid(), date, start, end, breakMin };
+  _data.entries.push(entry);
+  adjustWorked(monthKey(date), entryHours(entry));
   await saveData();
   $('f-break').value = 0;
   $('f-preview').textContent = '–';
@@ -285,6 +287,17 @@ async function saveEntry() {
 }
 
 // ═══════════════════════════════════════════════
+//  WORKED HOURS HELPER
+// ═══════════════════════════════════════════════
+
+function adjustWorked(mk, delta) {
+  if (!_data.workedHours) _data.workedHours = {};
+  if (mk in _data.workedHours) {
+    _data.workedHours[mk] = Math.round((_data.workedHours[mk] + delta) * 100) / 100;
+  }
+}
+
+// ═══════════════════════════════════════════════
 //  OVERVIEW
 // ═══════════════════════════════════════════════
 
@@ -295,7 +308,15 @@ function renderOverview() {
     return;
   }
 
-  const sorted = Object.keys(groupByMonth(_data.entries)).sort().reverse();
+  // Include ALL months: from entries, workedHours, and paidHours
+  const allMks = new Set([
+    ...Object.keys(groupByMonth(_data.entries)),
+    ...Object.keys(_data.workedHours || {}),
+    ...Object.keys(_data.paidHours   || {}),
+  ]);
+  const sorted = [...allMks]
+    .filter(mk => { const m = parseInt(mk.slice(5)); return m >= 1 && m <= 12; })
+    .sort().reverse();
 
   // ── Grand total banner ──
   const grandOpen = sorted.reduce((sum, mk) => sum + monthStats(mk).open, 0);
@@ -391,7 +412,11 @@ async function saveEdit() {
   const end      = $('e-end').value;
   const breakMin = +$('e-break').value || 0;
   if (calcHours(start, end, breakMin) <= 0) { alert('Eindtijd moet na de begintijd liggen.'); return; }
-  _data.entries[idx] = { ..._data.entries[idx], date: $('e-date').value, start, end, breakMin };
+  const old     = _data.entries[idx];
+  const updated = { ...old, date: $('e-date').value, start, end, breakMin };
+  adjustWorked(monthKey(old.date),     -entryHours(old));
+  adjustWorked(monthKey(updated.date), +entryHours(updated));
+  _data.entries[idx] = updated;
   await saveData();
   closeModal();
   renderOverview();
@@ -399,6 +424,8 @@ async function saveEdit() {
 
 async function deleteEdit() {
   if (!confirm('Deze dag verwijderen?')) return;
+  const entry = _data.entries.find(x => x.id === _editId);
+  if (entry) adjustWorked(monthKey(entry.date), -entryHours(entry));
   _data.entries = _data.entries.filter(x => x.id !== _editId);
   await saveData();
   closeModal();
@@ -563,6 +590,11 @@ function parseSheet(rows) {
       if (!(mk in _importWorked)) _importWorked[mk] = pending.worked;
       pending = null;
     }
+
+    // Skip entries with invalid month numbers (e.g. typo "26.20.2022" → month 20)
+    // Their hours are already captured in workedHours via the month header row.
+    const monthNum = parseInt(date.slice(5, 7));
+    if (monthNum < 1 || monthNum > 12) continue;
 
     _importRows.push({ date, start, end, breakMin });
   }
