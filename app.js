@@ -288,12 +288,19 @@ async function saveEntry() {
 }
 
 async function savePlanned() {
-  const date = $('f-date').value;
+  const date     = $('f-date').value;
+  const start    = $('f-start').value;
+  const end      = $('f-end').value;
+  const breakMin = +$('f-break').value || 0;
   if (!date) { alert('Bitte Datum angeben.'); return; }
 
-  const entry = { id: uid(), date, planned: true };
+  const entry = { id: uid(), date, planned: true,
+                  ...(start ? { start } : {}),
+                  ...(end   ? { end   } : {}),
+                  ...(breakMin ? { breakMin } : {}) };
   _data.entries.push(entry);
   await saveData();
+  $('f-break').value = 0;
   $('f-preview').textContent = '–';
 
   renderOverview();
