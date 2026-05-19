@@ -1,4 +1,4 @@
-const CACHE = 'uren-v3';
+const CACHE = 'uren-v4';
 const ASSETS = [
   './',
   './index.html',
