@@ -4,13 +4,15 @@
 //  CRYPTO
 // ═══════════════════════════════════════════════
 
-const KEY_SALT   = 'uren_salt';
-const KEY_VERIFY = 'uren_verify';
-const KEY_DATA   = 'uren_data';
-const VERIFY_TAG = 'UREN_APP_VALID_v1';
+const KEY_SALT      = 'uren_salt';
+const KEY_VERIFY    = 'uren_verify';
+const KEY_DATA      = 'uren_data';
+const KEY_PIN_MODE  = 'uren_pin_enabled';  // 'true' | 'false'
+const VERIFY_TAG    = 'UREN_APP_VALID_v1';
 
-let _key  = null;   // CryptoKey (AES-GCM 256)
-let _data = null;   // { entries: [...], paidHours: {...}, workedHours: {...} }
+let _key      = null;    // CryptoKey (AES-GCM 256), null when PIN disabled
+let _data     = null;    // { entries: [...], paidHours: {...}, workedHours: {...} }
+let _pinMode  = true;    // whether PIN protection is active
 
 function rnd(n) { return crypto.getRandomValues(new Uint8Array(n)); }
 
@@ -57,13 +59,21 @@ async function decryptStr(key, b64) {
 // ═══════════════════════════════════════════════
 
 async function saveData() {
-  localStorage.setItem(KEY_DATA, await encryptStr(_key, JSON.stringify(_data)));
+  if (_pinMode) {
+    localStorage.setItem(KEY_DATA, await encryptStr(_key, JSON.stringify(_data)));
+  } else {
+    localStorage.setItem(KEY_DATA, JSON.stringify(_data));
+  }
 }
 
 async function loadData() {
   const raw = localStorage.getItem(KEY_DATA);
   if (!raw) return { entries: [], paidHours: {}, workedHours: {} };
-  return JSON.parse(await decryptStr(_key, raw));
+  if (_pinMode) {
+    return JSON.parse(await decryptStr(_key, raw));
+  } else {
+    try { return JSON.parse(raw); } catch { return { entries: [], paidHours: {}, workedHours: {} }; }
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -139,16 +149,24 @@ function $(id) { return document.getElementById(id); }
 //  LOGIN / PIN
 // ═══════════════════════════════════════════════
 
-function isFirstRun() { return !localStorage.getItem(KEY_SALT); }
+function isFirstRun() { return localStorage.getItem(KEY_PIN_MODE) === null; }
 
 async function setupPIN(pin) {
   const salt = rnd(16);
   const key  = await deriveKey(pin, salt);
   const init = { entries: [], paidHours: {}, workedHours: {} };
-  localStorage.setItem(KEY_SALT,   buf2b64(salt));
-  localStorage.setItem(KEY_VERIFY, await encryptStr(key, VERIFY_TAG));
-  localStorage.setItem(KEY_DATA,   await encryptStr(key, JSON.stringify(init)));
+  localStorage.setItem(KEY_SALT,     buf2b64(salt));
+  localStorage.setItem(KEY_VERIFY,   await encryptStr(key, VERIFY_TAG));
+  localStorage.setItem(KEY_PIN_MODE, 'true');
+  localStorage.setItem(KEY_DATA,     await encryptStr(key, JSON.stringify(init)));
   return { key, data: init };
+}
+
+async function setupNoPIN() {
+  const init = { entries: [], paidHours: {}, workedHours: {} };
+  localStorage.setItem(KEY_PIN_MODE, 'false');
+  localStorage.setItem(KEY_DATA,     JSON.stringify(init));
+  return init;
 }
 
 async function verifyPIN(pin) {
@@ -159,6 +177,23 @@ async function verifyPIN(pin) {
     if (pt === VERIFY_TAG) return key;
   } catch {}
   return null;
+}
+
+function showApp() {
+  $('login-screen').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('f-date').value = new Date().toISOString().slice(0, 10);
+  updatePinToggleUI();
+}
+
+async function startWithoutPIN() {
+  _pinMode = false;
+  if (isFirstRun()) {
+    _data = await setupNoPIN();
+  } else {
+    _data = await loadData();
+  }
+  showApp();
 }
 
 async function handleLogin() {
@@ -184,6 +219,7 @@ async function handleLogin() {
   $('login-btn').disabled = true;
 
   try {
+    _pinMode = true;
     if (firstRun) {
       const r = await setupPIN(pin);
       _key  = r.key;
@@ -199,9 +235,7 @@ async function handleLogin() {
     }
     $('pin-input').value = '';
     $('pin-confirm').value = '';
-    $('login-screen').classList.add('hidden');
-    $('app').classList.remove('hidden');
-    $('f-date').value = new Date().toISOString().slice(0, 10);
+    showApp();
   } catch (e) {
     err.textContent = 'Fehler: ' + e.message;
     err.classList.remove('hidden');
@@ -228,15 +262,68 @@ async function handleChangePIN() {
 
   const salt   = rnd(16);
   const newKey = await deriveKey(p1, salt);
-  localStorage.setItem(KEY_SALT,   buf2b64(salt));
-  localStorage.setItem(KEY_VERIFY, await encryptStr(newKey, VERIFY_TAG));
-  _key = newKey;
+  localStorage.setItem(KEY_SALT,     buf2b64(salt));
+  localStorage.setItem(KEY_VERIFY,   await encryptStr(newKey, VERIFY_TAG));
+  localStorage.setItem(KEY_PIN_MODE, 'true');
+  _key     = newKey;
+  _pinMode = true;
   await saveData();
 
   $('new-pin').value = '';
   $('new-pin-confirm').value = '';
   msg.textContent = '✓ PIN geändert.'; msg.className = 'success';
   msg.classList.remove('hidden');
+}
+
+async function enablePIN() {
+  const msg = $('pin-toggle-msg');
+  const p1  = $('toggle-pin-new').value.trim();
+  const p2  = $('toggle-pin-confirm').value.trim();
+  msg.classList.add('hidden');
+  if (p1.length < 4) {
+    msg.textContent = 'PIN muss mindestens 4 Zeichen lang sein.'; msg.className = 'error';
+    msg.classList.remove('hidden'); return;
+  }
+  if (p1 !== p2) {
+    msg.textContent = 'PINs stimmen nicht überein.'; msg.className = 'error';
+    msg.classList.remove('hidden'); return;
+  }
+  const salt   = rnd(16);
+  const newKey = await deriveKey(p1, salt);
+  localStorage.setItem(KEY_SALT,     buf2b64(salt));
+  localStorage.setItem(KEY_VERIFY,   await encryptStr(newKey, VERIFY_TAG));
+  _key     = newKey;
+  _pinMode = true;
+  localStorage.setItem(KEY_PIN_MODE, 'true');
+  await saveData();
+  $('toggle-pin-new').value = '';
+  $('toggle-pin-confirm').value = '';
+  msg.textContent = '✓ PIN-Schutz aktiviert.'; msg.className = 'success';
+  msg.classList.remove('hidden');
+  updatePinToggleUI();
+}
+
+async function disablePIN() {
+  const msg = $('pin-toggle-msg');
+  if (!confirm('PIN-Schutz deaktivieren? Die Daten werden danach unverschlüsselt gespeichert.')) return;
+  _pinMode = false;
+  localStorage.setItem(KEY_PIN_MODE, 'false');
+  localStorage.removeItem(KEY_SALT);
+  localStorage.removeItem(KEY_VERIFY);
+  _key = null;
+  await saveData();
+  msg.textContent = '✓ PIN-Schutz deaktiviert.'; msg.className = 'success';
+  msg.classList.remove('hidden');
+  updatePinToggleUI();
+}
+
+function updatePinToggleUI() {
+  const active = localStorage.getItem(KEY_PIN_MODE) === 'true';
+  $('pin-status-label').textContent = active ? '🔒 PIN-Schutz aktiv' : '🔓 Kein PIN-Schutz';
+  $('pin-enable-form').classList.toggle('hidden', active);
+  $('pin-disable-btn').classList.toggle('hidden', !active);
+  // Also hide "PIN ändern" when PIN is disabled
+  $('pin-change-section').classList.toggle('hidden', !active);
 }
 
 // ═══════════════════════════════════════════════
@@ -748,15 +835,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Service worker
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
-  // First-run: show confirm field and change button label
-  if (isFirstRun()) {
-    $('login-label').textContent = 'Wähle eine PIN (mindestens 4 Zeichen)';
-    $('login-btn').textContent   = 'PIN festlegen';
+  const pinMode = localStorage.getItem(KEY_PIN_MODE);
+
+  if (pinMode === 'false') {
+    // PIN disabled: skip login, load data directly
+    _pinMode = false;
+    loadData().then(data => { _data = data; showApp(); });
+  } else if (pinMode === 'true') {
+    // PIN enabled: show normal login
+    $('login-label').textContent = 'Gib deine PIN ein';
+    $('login-btn').textContent   = 'Anmelden';
+    $('no-pin-btn').classList.add('hidden');
+    $('pin-confirm').classList.add('hidden');
+  } else {
+    // First run: show choice
+    $('login-label').textContent = 'Erste Einrichtung';
+    $('login-btn').textContent   = 'Mit PIN starten';
     $('pin-confirm').classList.remove('hidden');
+    $('no-pin-btn').classList.remove('hidden');
   }
 
   // Login
   $('login-btn').addEventListener('click', handleLogin);
+  $('no-pin-btn').addEventListener('click', startWithoutPIN);
   $('pin-input').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
   $('pin-confirm').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 
@@ -783,6 +884,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Export
   $('export-csv').addEventListener('click', exportCSV);
   $('export-json').addEventListener('click', exportJSON);
+
+  // PIN toggle
+  $('pin-enable-btn').addEventListener('click', enablePIN);
+  $('pin-disable-btn').addEventListener('click', disablePIN);
 
   // PIN change
   $('change-pin-btn').addEventListener('click', handleChangePIN);

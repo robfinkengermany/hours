@@ -25,6 +25,7 @@
       <input type="password" id="pin-confirm" inputmode="numeric" maxlength="8"
              placeholder="PIN bestätigen" autocomplete="new-password" class="hidden">
       <button id="login-btn" class="btn-primary full">Anmelden</button>
+      <button id="no-pin-btn" class="btn-secondary full hidden" style="margin-top:.5rem">Ohne PIN fortfahren</button>
       <p id="login-error" class="error hidden"></p>
     </div>
   </div>
@@ -94,6 +95,19 @@
         <button id="export-json" class="btn-secondary full">⬇ JSON herunterladen (Sicherung)</button>
       </div>
       <div class="form-card">
+        <h2>PIN-Schutz</h2>
+        <p id="pin-status-label" style="margin-bottom:.75rem;font-weight:600">🔒 PIN-Schutz aktiv</p>
+        <div id="pin-enable-form" class="hidden">
+          <input type="password" id="toggle-pin-new" inputmode="numeric" maxlength="8"
+                 placeholder="Neue PIN" autocomplete="new-password">
+          <input type="password" id="toggle-pin-confirm" inputmode="numeric" maxlength="8"
+                 placeholder="PIN bestätigen" autocomplete="new-password" style="margin-top:.5rem">
+          <button id="pin-enable-btn" class="btn-primary full" style="margin-top:.5rem">🔒 PIN aktivieren</button>
+        </div>
+        <button id="pin-disable-btn" class="btn-secondary full hidden">🔓 PIN deaktivieren</button>
+        <p id="pin-toggle-msg" class="hidden" style="margin-top:.5rem"></p>
+      </div>
+      <div id="pin-change-section" class="form-card">
         <h2>PIN ändern</h2>
         <input type="password" id="new-pin" inputmode="numeric" maxlength="8"
                placeholder="Neue PIN" autocomplete="new-password">
